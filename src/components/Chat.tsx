@@ -16,6 +16,22 @@ interface Chat {
   createdAt: Date;
 }
 
+const API_KEY = "AIzaSyACs27id08grEM8zZ3V44vNfIprnoh9nHs"; // Replace with your actual API key
+
+async function getTextResponse(prompt: string) {
+    try {
+        const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ "contents": [{ "parts": [{ "text": prompt }] }] })
+        });
+        const data = await response.json();
+        return data.candidates[0].content.parts[0].text;
+    } catch (error) {
+        return "Error: " + error.message;
+    }
+}
+
 function Chat() {
   const [showPaperGen, setShowPaperGen] = useState(false);
   const [message, setMessage] = useState('');
@@ -94,21 +110,20 @@ function Chat() {
         ));
       }
 
-      // Simulate assistant response
-      setTimeout(() => {
-        const botMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          text: 'I understand your request. How can I assist you further with this topic?',
-          sender: 'assistant',
-          timestamp: new Date(),
-        };
-        setChats(prev => prev.map(chat =>
-          chat.id === activeChat
-            ? { ...chat, messages: [...chat.messages, botMessage] }
-            : chat
-        ));
-        setIsTyping(false);
-      }, 1500);
+      // Get bot response
+      const botResponse = await getTextResponse(message);
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: botResponse,
+        sender: 'assistant',
+        timestamp: new Date(),
+      };
+      setChats(prev => prev.map(chat =>
+        chat.id === activeChat
+          ? { ...chat, messages: [...chat.messages, botMessage] }
+          : chat
+      ));
+      setIsTyping(false);
     }
   };
 
