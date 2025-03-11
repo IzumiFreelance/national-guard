@@ -1,14 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Plus, Send, Trash2, MessageSquare } from 'lucide-react';
 import PaperGen from './PaperGen';
-import { getGeminiResponse } from '../utils/gemini';
 
 interface Message {
   id: string;
   text: string;
   sender: 'user' | 'assistant';
   timestamp: Date;
-  error?: boolean;
 }
 
 interface Chat {
@@ -96,12 +94,11 @@ function Chat() {
         ));
       }
 
-      try {
-        // Get response from Gemini API
-        const response = await getGeminiResponse(message.trim());
+      // Simulate assistant response
+      setTimeout(() => {
         const botMessage: Message = {
           id: (Date.now() + 1).toString(),
-          text: response,
+          text: 'I understand your request. How can I assist you further with this topic?',
           sender: 'assistant',
           timestamp: new Date(),
         };
@@ -110,23 +107,8 @@ function Chat() {
             ? { ...chat, messages: [...chat.messages, botMessage] }
             : chat
         ));
-      } catch (error) {
-        // Handle API error
-        const errorMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          text: "I apologize, but I encountered an error processing your request. Please try again.",
-          sender: 'assistant',
-          timestamp: new Date(),
-          error: true
-        };
-        setChats(prev => prev.map(chat =>
-          chat.id === activeChat
-            ? { ...chat, messages: [...chat.messages, errorMessage] }
-            : chat
-        ));
-      } finally {
         setIsTyping(false);
-      }
+      }, 1500);
     }
   };
 
@@ -150,9 +132,9 @@ function Chat() {
           {chats.map(chat => (
             <div
               key={chat.id}
-              className={group flex items-center justify-between p-3 rounded-lg cursor-pointer hover:bg-gray-100 ${
+              className={`group flex items-center justify-between p-3 rounded-lg cursor-pointer hover:bg-gray-100 ${
                 activeChat === chat.id ? 'bg-gray-100' : ''
-              }}
+              }`}
               onClick={() => setActiveChat(chat.id)}
             >
               <div className="flex items-center gap-2 truncate">
@@ -181,23 +163,19 @@ function Chat() {
           {getCurrentChat().messages.map((msg) => (
             <div
               key={msg.id}
-              className={flex ${msg.sender === 'assistant' ? 'bg-gray-50' : ''} -mx-4 px-4 py-6}
+              className={`flex ${msg.sender === 'assistant' ? 'bg-gray-50' : ''} -mx-4 px-4 py-6`}
             >
               <div className="flex-1 max-w-3xl mx-auto flex gap-4">
-                <div className={w-8 h-8 rounded-full flex items-center justify-center ${
-                  msg.sender === 'assistant' 
-                    ? msg.error 
-                      ? 'bg-red-500' 
-                      : 'bg-green-500' 
-                    : 'bg-gray-800'
-                }}>
-                  {msg.sender === 'assistant' ? msg.error ? '❌' : '🤖' : '👤'}
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  msg.sender === 'assistant' ? 'bg-green-500' : 'bg-gray-800'
+                }`}>
+                  {msg.sender === 'assistant' ? '🤖' : '👤'}
                 </div>
                 <div className="flex-1">
                   <div className="font-medium mb-1">
                     {msg.sender === 'assistant' ? 'Assistant' : 'You'}
                   </div>
-                  <div className={leading-relaxed ${msg.error ? 'text-red-600' : 'text-gray-700'}}>
+                  <div className="text-gray-700 leading-relaxed">
                     {msg.text}
                   </div>
                 </div>
