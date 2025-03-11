@@ -6,7 +6,7 @@ function Chat() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const API_KEY = "YOUR_GEMINI_API_KEY"; // Replace with your actual API key
+  const API_KEY = "AIzaSyACs27id08grEM8zZ3V44vNfIprnoh9nHs"; // Replace with your actual API key
 
   const getTextResponse = async (prompt) => {
     try {
