@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, FileText, Bot, User, Loader } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
-const API_KEY = "AIzaSyACs27id08grEM8zZ3V44vNfIprnoh9nHs"; // Replace with your actual API key
+const API_KEY = ""; // Replace with your actual API key
 
 interface Message {
   type: 'user' | 'bot';
@@ -23,6 +25,38 @@ async function getTextResponse(prompt: string) {
   }
 }
 
+const generateMCQs = (topic: string) => {
+  const mcqs = Array.from({ length: 30 }, (_, i) => {
+    const question = `Q${i + 1}: ${topic}?`;
+    const correctAnswer = `Correct Answer ${i + 1}`;
+    const incorrectAnswers = [
+      `Incorrect Answer ${i + 1}A`,
+      `Incorrect Answer ${i + 1}B`,
+      `Incorrect Answer ${i + 1}C`,
+    ];
+    const allAnswers = [correctAnswer, ...incorrectAnswers].sort(() => Math.random() - 0.5);
+    return {
+      question,
+      answers: allAnswers,
+      correctAnswer,
+    };
+  });
+  return mcqs;
+};
+
+const downloadPDF = (topic: string, mcqs: any[]) => {
+  const doc = new jsPDF();
+  doc.text(`MCQs for Topic: ${topic}`, 10, 10);
+  const rows = mcqs.map((mcq, index) => [
+    index + 1, mcq.question, ...mcq.answers,
+  ]);
+  doc.autoTable({
+    head: [['#', 'Question', 'A', 'B', 'C', 'D']],
+    body: rows,
+  });
+  doc.save('mcqs.pdf');
+};
+
 const PaperGen = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -33,6 +67,7 @@ const PaperGen = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [mcqs, setMcqs] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -65,6 +100,9 @@ const PaperGen = () => {
     };
     setMessages(prev => [...prev, botMessage]);
     setIsLoading(false);
+
+    const generatedMCQs = generateMCQs(botResponse);
+    setMcqs(generatedMCQs);
   };
 
   return (
@@ -150,6 +188,17 @@ const PaperGen = () => {
           </form>
         </div>
       </div>
+
+      {mcqs.length > 0 && (
+        <div className="p-4">
+          <button
+            onClick={() => downloadPDF(input, mcqs)}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+          >
+            Download as PDF
+          </button>
+        </div>
+      )}
     </div>
   );
 };
