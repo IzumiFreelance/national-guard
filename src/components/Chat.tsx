@@ -240,9 +240,9 @@ function Chat() {
               <Send className="w-5 h-5" />
             </button>
           </form>
-          <div className="max-w-3xl mx-auto mt-2 text-center text-xs text-gray-500">
+          {/* <div className="max-w-3xl mx-auto mt-2 text-center text-xs text-gray-500">
             Free Research Preview. ChatGPT may produce inaccurate information about people, places, or facts.
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
