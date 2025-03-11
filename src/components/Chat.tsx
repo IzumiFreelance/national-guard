@@ -54,18 +54,13 @@ function Chatbot() {
         </div>
 
         <div className="flex items-center gap-4 mt-auto">
-          <button className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-300">
-            <Plus className="w-6 h-6 text-gray-500" />
-          </button>
-          
-          <input
-            type="text"
-            className="flex-grow bg-gray-100 rounded-full px-4 py-2 border border-gray-300 focus:outline-none"
+          <textarea
+            className="flex-grow bg-gray-100 rounded-lg px-4 py-2 border border-gray-300 focus:outline-none resize-none h-20"
             placeholder="Type a message..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-          />
+            onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+          ></textarea>
           
           <button
             onClick={sendMessage}
