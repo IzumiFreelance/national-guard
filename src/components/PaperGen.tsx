@@ -31,13 +31,31 @@ const generateMCQs = (topic: string) => {
 
 const downloadPDF = (topic: string, mcqs: any[]) => {
   const doc = new jsPDF();
-  doc.text(`MCQs for Topic: ${topic}`, 10, 10);
-  const rows = mcqs.map((mcq, index) => [index + 1, mcq.question, ...mcq.answers]);
-  doc.autoTable({
-    head: [['#', 'Question', 'A', 'B', 'C', 'D']],
-    body: rows,
+  doc.setFont('times', 'bold');
+  doc.setFontSize(18);
+  doc.text(`MCQs Examination Paper`, 105, 15, { align: 'center' });
+  doc.setFontSize(14);
+  doc.text(`Subject: ${topic}`, 15, 30);
+  doc.text(`Total Questions: 30`, 15, 40);
+  doc.text(`Instructions: Select the correct answer from the given options.`, 15, 50);
+
+  let y = 60;
+  mcqs.forEach((mcq, index) => {
+    doc.setFont('times', 'normal');
+    doc.text(`${index + 1}. ${mcq.question}`, 15, y);
+    y += 7;
+    mcq.answers.forEach((answer: string, i: number) => {
+      doc.text(`${String.fromCharCode(65 + i)}. ${answer}`, 20, y);
+      y += 6;
+    });
+    y += 4;
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
+    }
   });
-  doc.save(`${topic.replace(/\s+/g, '_')}_mcqs.pdf`);
+
+  doc.save(`${topic.replace(/\s+/g, '_')}_mcqs_paper.pdf`);
 };
 
 const PaperGen = () => {
@@ -64,7 +82,6 @@ const PaperGen = () => {
     setInput('');
     setIsLoading(true);
 
-    // Generate MCQs based on user input (topic)
     const generatedMCQs = generateMCQs(input);
     setMcqs(generatedMCQs);
 
@@ -118,26 +135,6 @@ const PaperGen = () => {
             </div>
           )}
           <div ref={messagesEndRef} />
-        </div>
-      </div>
-      <div className="border-t bg-white p-4">
-        <div className="max-w-3xl mx-auto">
-          <form onSubmit={handleSubmit} className="flex gap-4">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Enter topic for MCQs..."
-              className="flex-1 p-2 border rounded-lg focus:outline-none focus:border-blue-500"
-            />
-            <button
-              type="submit"
-              disabled={!input.trim() || isLoading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Send size={20} />
-            </button>
-          </form>
         </div>
       </div>
       {mcqs.length > 0 && (
