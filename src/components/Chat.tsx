@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Plus, Mic, Send } from "lucide-react";
+import { Plus, Send } from "lucide-react";
 
 function Chatbot() {
   const [messages, setMessages] = useState([]);
@@ -11,7 +11,7 @@ function Chatbot() {
   const getTextResponse = async (prompt) => {
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${API_KEY}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -34,15 +34,15 @@ function Chatbot() {
     setLoading(true);
 
     const botResponse = await getTextResponse(input);
-    setMessages([...newMessages, { text: botResponse, sender: "bot" }]);
+    setMessages((prevMessages) => [...prevMessages, { text: botResponse, sender: "bot" }]);
     setLoading(false);
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gray-100 py-10 px-4">
       <h1 className="text-4xl font-bold mb-6">Chatbot</h1>
-      <div className="w-full max-w-3xl bg-white rounded-lg shadow-lg p-6 flex flex-col">
-        <div className="flex-grow h-80 overflow-y-auto border-b border-gray-300 pb-4 mb-4">
+      <div className="w-full max-w-3xl bg-white rounded-lg shadow-lg p-6 flex flex-col h-[500px]">
+        <div className="flex-grow overflow-y-auto border-b border-gray-300 pb-4 mb-4">
           {messages.map((msg, index) => (
             <div
               key={index}
