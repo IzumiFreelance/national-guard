@@ -19,30 +19,33 @@ interface Chat {
 const API_KEY = "AIzaSyACs27id08grEM8zZ3V44vNfIprnoh9nHs"; // Replace with your actual API key
 
 async function getTextResponse(prompt: string) {
-    try {
-        const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ "contents": [{ "parts": [{ "text": prompt }] }] })
-        });
-        const data = await response.json();
-        return data.candidates[0].content.parts[0].text;
-    } catch (error) {
-        return "Error: " + error.message;
-    }
+  try {
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ "contents": [{ "parts": [{ "text": prompt }] }] })
+    });
+    const data = await response.json();
+    return data.candidates[0].content.parts[0].text;
+  } catch (error) {
+    return "Error: " + error.message;
+  }
 }
 
 function Chat() {
   const [showPaperGen, setShowPaperGen] = useState(false);
   const [message, setMessage] = useState('');
-  const [chats, setChats] = useState<Chat[]>([
-    {
-      id: 'default',
-      title: 'New Chat',
-      messages: [],
-      createdAt: new Date()
-    }
-  ]);
+  const [chats, setChats] = useState<Chat[]>(() => {
+    const savedChats = localStorage.getItem('chats');
+    return savedChats ? JSON.parse(savedChats) : [
+      {
+        id: 'default',
+        title: 'New Chat',
+        messages: [],
+        createdAt: new Date()
+      }
+    ];
+  });
   const [activeChat, setActiveChat] = useState('default');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -59,6 +62,10 @@ function Chat() {
   useEffect(() => {
     inputRef.current?.focus();
   }, [activeChat]);
+
+  useEffect(() => {
+    localStorage.setItem('chats', JSON.stringify(chats));
+  }, [chats]);
 
   const getCurrentChat = () => {
     return chats.find(chat => chat.id === activeChat) || chats[0];
