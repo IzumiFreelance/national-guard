@@ -11,23 +11,26 @@ interface Message {
   timestamp: Date;
 }
 
-const generateMCQs = (topic: string) => {
-  return Array.from({ length: 30 }, (_, i) => {
-    const question = `Q${i + 1}: What is an important aspect of ${topic}?`;
-    const correctAnswer = `Correct Answer ${i + 1}`;
-    const incorrectAnswers = [
-      `Incorrect Answer ${i + 1}A`,
-      `Incorrect Answer ${i + 1}B`,
-      `Incorrect Answer ${i + 1}C`,
-    ];
-    const allAnswers = [correctAnswer, ...incorrectAnswers].sort(() => Math.random() - 0.5);
-    return {
-      question,
-      answers: allAnswers,
-      correctAnswer,
-    };
-  });
-};
+async function getMCQsFromAPI(topic: string) {
+  try {
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ "contents": [{ "parts": [{ "text": `Generate 30 MCQs on ${topic}.` }] }] })
+    });
+    const data = await response.json();
+    return data.candidates[0].content.parts[0].text.split('\n').map((q: string, i: number) => {
+      const parts = q.split('?');
+      return {
+        question: `Q${i + 1}: ${parts[0]}?`,
+        answers: parts.slice(1).map((a, index) => `${String.fromCharCode(65 + index)}. ${a}`),
+        correctAnswer: parts[1] // Assuming API provides the correct answer in a structured manner
+      };
+    });
+  } catch (error) {
+    return [];
+  }
+}
 
 const downloadPDF = (topic: string, mcqs: any[]) => {
   const doc = new jsPDF();
@@ -44,8 +47,8 @@ const downloadPDF = (topic: string, mcqs: any[]) => {
     doc.setFont('times', 'normal');
     doc.text(`${index + 1}. ${mcq.question}`, 15, y);
     y += 7;
-    mcq.answers.forEach((answer: string, i: number) => {
-      doc.text(`${String.fromCharCode(65 + i)}. ${answer}`, 20, y);
+    mcq.answers.forEach((answer: string) => {
+      doc.text(answer, 20, y);
       y += 6;
     });
     y += 4;
@@ -82,7 +85,7 @@ const PaperGen = () => {
     setInput('');
     setIsLoading(true);
 
-    const generatedMCQs = generateMCQs(input);
+    const generatedMCQs = await getMCQsFromAPI(input);
     setMcqs(generatedMCQs);
 
     const botMessage: Message = {
