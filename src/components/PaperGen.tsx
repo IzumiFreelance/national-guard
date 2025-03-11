@@ -1,10 +1,26 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, FileText, Bot, User, Loader } from 'lucide-react';
 
+const API_KEY = "AIzaSyACs27id08grEM8zZ3V44vNfIprnoh9nHs"; // Replace with your actual API key
+
 interface Message {
   type: 'user' | 'bot';
   content: string;
   timestamp: Date;
+}
+
+async function getTextResponse(prompt: string) {
+  try {
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ "contents": [{ "parts": [{ "text": prompt }] }] })
+    });
+    const data = await response.json();
+    return data.candidates[0].content.parts[0].text;
+  } catch (error) {
+    return "Error: " + error.message;
+  }
 }
 
 const PaperGen = () => {
@@ -31,7 +47,6 @@ const PaperGen = () => {
     e.preventDefault();
     if (!input.trim()) return;
 
-    // Add user message
     const userMessage: Message = {
       type: 'user',
       content: input,
@@ -41,16 +56,15 @@ const PaperGen = () => {
     setInput('');
     setIsLoading(true);
 
-    // Simulate bot response
-    setTimeout(() => {
-      const botMessage: Message = {
-        type: 'bot',
-        content: 'I understand you want to create a paper. Please specify the following:\n1. Subject area\n2. Difficulty level\n3. Number of questions\n4. Time duration',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, botMessage]);
-      setIsLoading(false);
-    }, 1000);
+    const botResponse = await getTextResponse(input);
+
+    const botMessage: Message = {
+      type: 'bot',
+      content: botResponse,
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, botMessage]);
+    setIsLoading(false);
   };
 
   return (
