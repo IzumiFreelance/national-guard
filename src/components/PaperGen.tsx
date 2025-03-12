@@ -1,9 +1,10 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, FileText, Bot, User, Loader } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 
-const API_KEY = ""; // Replace with your actual API key
+const API_KEY = "AIzaSyACs27id08grEM8zZ3V44vNfIprnoh9nHs"; // Replace with your actual API key
 
 interface Message {
   type: 'user' | 'bot';
@@ -62,10 +63,17 @@ const downloadPDF = (topic: string, mcqs: any[]) => {
 };
 
 const PaperGen = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      type: 'bot',
+      content: 'Hello! I can help you generate exam papers. What topic do you want the paper on?',
+      timestamp: new Date()
+    }
+  ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [mcqs, setMcqs] = useState<any[]>([]);
+  const [selectedTopic, setSelectedTopic] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -80,14 +88,19 @@ const PaperGen = () => {
     e.preventDefault();
     if (!input.trim()) return;
 
+    // Store user's message
     const userMessage: Message = { type: 'user', content: input, timestamp: new Date() };
     setMessages(prev => [...prev, userMessage]);
+    
+    setSelectedTopic(input);
     setInput('');
     setIsLoading(true);
 
+    // Fetch MCQs
     const generatedMCQs = await getMCQsFromAPI(input);
     setMcqs(generatedMCQs);
 
+    // Store bot response
     const botMessage: Message = {
       type: 'bot',
       content: `Generated 30 MCQs for topic: ${input}. Click below to download.`,
@@ -98,13 +111,16 @@ const PaperGen = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
-      <div className="bg-white border-b p-4">
+    <div className="h-screen flex flex-col bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b mt-[88px] p-4">
         <div className="max-w-3xl mx-auto flex items-center gap-2">
           <FileText className="text-blue-600" size={24} />
           <h1 className="text-xl font-semibold">Paper Generation Assistant</h1>
         </div>
       </div>
+
+      {/* Chat Container */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         <div className="max-w-3xl mx-auto">
           {messages.map((message, index) => (
@@ -140,12 +156,33 @@ const PaperGen = () => {
           <div ref={messagesEndRef} />
         </div>
       </div>
+
+      {/* Input Form */}
+      <div className="border-t bg-white p-4">
+        <div className="max-w-3xl mx-auto">
+          <form onSubmit={handleSubmit} className="flex gap-4">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type your topic..."
+              className="flex-1 p-2 border rounded-lg focus:outline-none focus:border-blue-500"
+            />
+            <button
+              type="submit"
+              disabled={!input.trim() || isLoading}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Send size={20} />
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* Download MCQ Paper */}
       {mcqs.length > 0 && (
         <div className="p-4 text-center">
-          <button
-            onClick={() => downloadPDF(input, mcqs)}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-          >
+          <button onClick={() => downloadPDF(selectedTopic, mcqs)} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
             Download MCQs PDF
           </button>
         </div>
@@ -155,3 +192,4 @@ const PaperGen = () => {
 };
 
 export default PaperGen;
+
