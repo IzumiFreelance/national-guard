@@ -243,7 +243,7 @@ function App() {
       <div className={`relative transition-all duration-700 ease-in-out ${isLoading ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
         <div className="relative flex flex-col min-h-screen">
           {/* Header/Navigation */}
-          <header className="bg-white shadow-md sticky top-0 z-50">
+          <header className={`bg-white shadow-md ${activePage === 'chat' || activePage === 'paper-gen' ? 'fixed' : 'sticky'} w-full top-0 z-50`}>
             <div className="container mx-auto px-4 py-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
@@ -455,7 +455,7 @@ function App() {
           {renderPage()}
 
           {/* Footer */}
-          {activePage !== 'admin-dashboard' && (
+          {activePage !== 'admin-dashboard' && activePage !== 'chat' && activePage !== 'paper-gen' &&  (
             <footer className="bg-gray-900 text-white mt-auto">
               <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
