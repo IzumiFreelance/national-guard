@@ -134,7 +134,7 @@ function Chat() {
   return (
     <div className="min-h-screen flex bg-white">
       {/* Sidebar */}
-      <div className="w-64 bg-gray-50 border-r border-gray-200 flex flex-col">
+      <div className="w-64 mt-[88px] bg-gray-50 border-r border-gray-200 flex flex-col">
         <button
           onClick={createNewChat}
           className="m-3 flex items-center justify-center gap-2 p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
@@ -173,7 +173,7 @@ function Chat() {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col max-h-screen">
+      <div className="flex-1 flex flex-col max-h-screen  mt-[88px]">
         <div className="flex-grow overflow-y-auto p-4 space-y-6">
           {getCurrentChat().messages.map((msg) => (
             <div
@@ -234,7 +234,7 @@ function Chat() {
             </button>
           </form>
           <div className="max-w-3xl mx-auto mt-2 text-center text-xs text-gray-500">
-            Free Research Preview. ChatGPT may produce inaccurate information about people, places, or facts.
+            Free Research Preview.
           </div>
         </div>
       </div>
