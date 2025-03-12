@@ -192,4 +192,3 @@ const PaperGen = () => {
 };
 
 export default PaperGen;
-
